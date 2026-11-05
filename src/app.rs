@@ -1196,7 +1196,7 @@ impl Workspace {
                     })
                     .child(
                         seg("doc-search", "search")
-                            .tip_label(crate::settings::text("搜索(⌘ + J)").into(), TipSide::Below)
+                            .tip_label(crate::shortcuts::keys(crate::settings::text("搜索(⌘ + J)")).into(), TipSide::Below)
                             .on_click(cx.listener(|_, _, window, cx| window.dispatch_action(Box::new(FocusSearch), cx))),
                     )
                     .child(

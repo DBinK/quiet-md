@@ -329,7 +329,7 @@ fn sample_page(t: &themes::Theme, s: f32) -> Div {
         .child(cell(a, head).border_r_1().border_color(line_c)).child(cell(b, head));
     let table = div().w_full().rounded(sc(st.num("table.radius"))).border_1().border_color(line_c).overflow_hidden()
         .text_size(sc(st.num("table.size"))).line_height(sc(st.num("table.line-height")))
-        .child(row(tr("按键", "Keys"), tr("作用", "Does"), true, false)).child(row("⌘ N", tr("新建文档", "New document"), false, false)).child(row("⌘ J", tr("搜索所有文档", "Search documents"), false, true));
+        .child(row(tr("按键", "Keys"), tr("作用", "Does"), true, false)).child(row(crate::shortcuts::keys("⌘ N"), tr("新建文档", "New document"), false, false)).child(row(crate::shortcuts::keys("⌘ J"), tr("搜索所有文档", "Search documents"), false, true));
     let (hr_c, hr_w) = (st.color("hr.color").unwrap_or_else(|| st.token("separator_dots")), (st.num("hr.width") * s).max(0.6));
     // Painted to the column's width: a row of fixed-size dots would set the
     // column's minimum width and squeeze its neighbour.
@@ -368,7 +368,7 @@ fn sample_page(t: &themes::Theme, s: f32) -> Div {
             .child(para)
             .child(callout)
             .child(heading(1, tr("五分钟上手", "Five minutes")))
-            .child(div().flex().flex_col().child(task(true, tr("打开这份指南", "Open this guide"))).child(task(false, tr("按 ⌘ N 新建一篇文档", "Press ⌘ N for a new document"))))
+            .child(div().flex().flex_col().child(task(true, tr("打开这份指南", "Open this guide"))).child(task(false, crate::shortcuts::keys(tr("按 ⌘ N 新建一篇文档", "Press ⌘ N for a new document")))))
             .child(heading(2, tr("三种输入方式", "Three ways to write")))
             .child(div().flex().flex_col().child(bullet(tr("斜杠菜单：输入 / 插入任意内容块", "Slash menu: type / to insert any block"))).child(bullet(tr("Markdown：# 加空格变标题", "Markdown: # and a space make a heading"))))
             .child(div().flex().flex_col().child(number("1.", tr("先读「写作基础」", "Read Writing basics first"))).child(number("2.", tr("再看「内容块」", "Then Content blocks"))))

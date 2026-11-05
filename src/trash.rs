@@ -87,7 +87,7 @@ impl Workspace {
     pub(crate) fn render_trash(&mut self, cx: &mut Context<Self>) -> AnyElement {
         let header = page_header(self, "回收站", 26., cx).child(
             crate::ui::header_icon("trash-search", "search")
-                .tip_label("搜索(⌘ + J)".into(), crate::ui::TipSide::Below)
+                .tip_label(crate::shortcuts::keys("搜索(⌘ + J)").into(), crate::ui::TipSide::Below)
                 .on_click(cx.listener(|_, _, window, cx| window.dispatch_action(Box::new(crate::app::FocusSearch), cx))),
         );
         let mut page = div().flex_1().min_w_0().h_full().flex().flex_col().child(header);
