@@ -71,7 +71,7 @@ fn open_main_window(scripted: bool, cx: &mut App) {
     cx.open_window(
         WindowOptions {
             window_bounds: Some(WindowBounds::Windowed(bounds)),
-            window_background: WindowBackgroundAppearance::Blurred,
+            window_background: crate::theme::window_background(),
             titlebar: Some(TitlebarOptions {
                 title: Some("Quiet.md".into()),
                 appears_transparent: cfg!(any(target_os = "macos", target_os = "windows")),
