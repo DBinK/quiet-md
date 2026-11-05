@@ -343,7 +343,7 @@ impl Theme {
     pub fn danger_cell() -> Hsla { c(craft::R50) }
     pub fn danger() -> Hsla { c(craft::R500) }
 
-    // ---- quiet.md shell
+    // ---- Quiet.md shell
     /// A light gray tint separates the sidebar from the white page while keeping wallpaper colors quiet.
     /// The document pane paints its own opaque white surface.
     pub fn window() -> Hsla { if crate::native_header::supported() { ca(craft::WINDOW, 0.) } else { ca(craft::WINDOW, 0.84) } }
@@ -518,7 +518,7 @@ pub fn heading_weight(level: u8) -> gpui::FontWeight {
     if level <= 2 { gpui::FontWeight::BOLD } else { gpui::FontWeight::SEMIBOLD }
 }
 
-/// Page title: quiet.md uses 34 / 55.25 Bold, larger than the 21pt
+/// Page title: Quiet.md uses 34 / 55.25 Bold, larger than the 21pt
 /// reference `.pageTitle`, to match preview typography; the larger title is
 /// an intentional deviation, not a measurement.
 pub const TITLE: BlockMetrics = BlockMetrics { size: 34.0, line_height: 55.25, mt: 0.0, mb: 0.0 };

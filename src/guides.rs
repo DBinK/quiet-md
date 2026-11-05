@@ -18,7 +18,7 @@ const WINDOWS_TEXT: &[(&str, &str)] = &[
     ("On macOS, <code>⌘ ⌃ ⇧ 4</code> captures a selection to the clipboard.", "<code>Win+Shift+S</code> captures a selection to the clipboard."),
     ("Drag an image from Finder into the document.", "Drag an image from File Explorer into the document."),
     ("a project banner from your Mac.", "a project banner from your computer."),
-    ("<h2>Move to another Mac</h2><ol><li>Quit quiet.md on the old Mac with", "<h2>Move to another computer</h2><ol><li>Quit quiet.md on the old computer with"),
+    ("<h2>Move to another Mac</h2><ol><li>Quit Quiet.md on the old Mac with", "<h2>Move to another computer</h2><ol><li>Quit Quiet.md on the old computer with"),
     ("Copy the complete Quiet.md folder into Documents on the new Mac.", "Copy the complete Quiet.md folder into Documents on the new computer."),
     ("Press a new combination containing Command, Control or Option.", "Press a new combination containing Ctrl or Alt."),
     // The system-wide quick-note shortcut exists on macOS only.

@@ -54,7 +54,7 @@ pub fn init() {
         default(info);
     }));
     let exe = std::env::current_exe().map(|p| p.display().to_string()).unwrap_or_default();
-    write(&format!("start quiet.md {} ({exe})", env!("CARGO_PKG_VERSION")));
+    write(&format!("start Quiet.md {} ({exe})", env!("CARGO_PKG_VERSION")));
 }
 
 /// One line to the log file and stderr.
@@ -78,7 +78,7 @@ pub fn fatal(what: &str, err: &anyhow::Error) -> ! {
         #[link(name = "user32")]
         unsafe extern "system" { fn MessageBoxW(hwnd: *mut std::ffi::c_void, text: *const u16, caption: *const u16, kind: u32) -> i32; }
         // MB_OK | MB_ICONERROR
-        unsafe { MessageBoxW(std::ptr::null_mut(), wide(&text).as_ptr(), wide("quiet.md").as_ptr(), 0x10); }
+        unsafe { MessageBoxW(std::ptr::null_mut(), wide(&text).as_ptr(), wide("Quiet.md").as_ptr(), 0x10); }
     }
     std::process::exit(1)
 }

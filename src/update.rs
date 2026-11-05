@@ -104,7 +104,7 @@ pub fn check(manual: bool, cx: &mut App) {
 
 /// A toast in the front window: the version and the sidebar's 更新 pill.
 fn announce(version: &str, cx: &mut App) {
-    let msg = crate::localized_format!("quiet.md {} 已发布，点侧栏顶部的「更新」安装", "quiet.md {} is available. Click Update at the top of the sidebar.", version);
+    let msg = crate::localized_format!("Quiet.md {} 已发布，点侧栏顶部的「更新」安装", "Quiet.md {} is available. Click Update at the top of the sidebar.", version);
     let window = cx.active_window().or_else(|| cx.windows().first().copied()).and_then(|w| w.downcast::<crate::app::Workspace>());
     if let Some(w) = window { let _ = w.update(cx, |ws, _, cx| ws.show_toast_kind(crate::ui::ToastKind::Info, &msg, cx)); }
 }
@@ -307,7 +307,7 @@ fn start_installer(new: &Path) -> Result<(), String> {
     let app = app_bundle().ok_or_else(|| crate::settings::tr("找不到正在运行的应用", "Could not find the running app").to_string())?;
     let parent = app.parent().ok_or("parent")?;
     if app.to_string_lossy().contains("/AppTranslocation/") {
-        return Err(crate::settings::tr("请先把 quiet.md 移到「应用程序」文件夹，再更新", "Move quiet.md to the Applications folder first, then update").into());
+        return Err(crate::settings::tr("请先把 Quiet.md 移到「应用程序」文件夹，再更新", "Move Quiet.md to the Applications folder first, then update").into());
     }
     // The folder must take the new bundle (a standard user cannot write to /Applications).
     let probe = parent.join(format!(".quiet.md-update-{}", std::process::id()));

@@ -72,7 +72,7 @@ fn open_main_window(scripted: bool, cx: &mut App) {
             window_bounds: Some(WindowBounds::Windowed(bounds)),
             window_background: WindowBackgroundAppearance::Blurred,
             titlebar: Some(TitlebarOptions {
-                title: Some("quiet.md".into()),
+                title: Some("Quiet.md".into()),
                 appears_transparent: cfg!(any(target_os = "macos", target_os = "windows")),
                 traffic_light_position: Some(point(px(20.), px(app::HEADER_H / 2. - 7.))),
             }),
