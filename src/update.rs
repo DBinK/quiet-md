@@ -152,7 +152,7 @@ fn public_key() -> Option<minisign_verify::PublicKey> {
 }
 
 /// `a` is a later version than `b` (dotted numbers; a missing part is 0).
-fn newer(a: &str, b: &str) -> bool {
+pub(crate) fn newer(a: &str, b: &str) -> bool {
     let parts = |v: &str| -> Option<Vec<u64>> { v.split('.').map(|p| p.parse().ok()).collect() };
     let (Some(mut a), Some(mut b)) = (parts(a), parts(b)) else { return false };
     let n = a.len().max(b.len());

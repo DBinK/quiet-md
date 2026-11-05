@@ -39,10 +39,12 @@ pub struct Preferences {
     pub auto_update: bool,
     /// Light or dark look: "light", "dark", or empty to follow the system.
     pub appearance: String,
+    /// The last version that opened this library (changelog.rs).
+    pub seen_version: String,
 }
 
 impl Default for Preferences {
-    fn default() -> Self { Preferences { theme: String::new(), feishu: true, english: true, remote_images: true, quick_hotkey: true, auto_update: true, appearance: String::new() } }
+    fn default() -> Self { Preferences { theme: String::new(), feishu: true, english: true, remote_images: true, quick_hotkey: true, auto_update: true, appearance: String::new(), seen_version: String::new() } }
 }
 
 impl Preferences {
@@ -103,7 +105,7 @@ pub fn prefs() -> Preferences {
     PREFS.read().unwrap().clone().unwrap_or_default()
 }
 
-fn save(p: &Preferences) -> anyhow::Result<()> {
+pub(crate) fn save(p: &Preferences) -> anyhow::Result<()> {
     use std::io::Write;
     let root = crate::store::Store::root_dir();
     std::fs::create_dir_all(&root)?;

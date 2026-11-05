@@ -244,6 +244,7 @@ impl Workspace {
             .child(header)
             .child(nav)
             .child(div().id("doc-list").flex_1().min_h_0().overflow_y_scroll().track_scroll(&self.list_scroll).child(list))
+            .children(crate::changelog::card(cx.listener(|_, _, _, cx| cx.notify())))
             .child(footer)
             .into_any_element()
     }

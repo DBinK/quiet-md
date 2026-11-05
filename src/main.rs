@@ -5,6 +5,7 @@ mod app;
 mod shared_store;
 mod quick_note;
 mod assets;
+mod changelog;
 mod guides;
 mod clipboard;
 mod devtools;
@@ -96,6 +97,8 @@ fn main() {
     // writing its own, and `guides` seeds a new library only once.
     let root = store::Store::root_dir();
     logging::write(&format!("library {}", root.display()));
+    // A library that was here before this launch can show 更新日志.
+    let existed = guides::seeded(&root).unwrap_or(false);
     if !scripted && let Err(err) = guides::initialize(&root) {
         logging::fatal(&format!("无法初始化文档库 / Could not set up the library at {}", root.display()), &err);
     }
@@ -115,6 +118,7 @@ fn main() {
         settings::apply_appearance(&settings::prefs().appearance);
         settings::sync_dark(cx);
         themes::load(&settings::prefs().theme_id(), false, || cx.text_system().all_font_names());
+        changelog::startup(existed);
         shortcuts::init(cx);
         match shared_store::SharedStore::open() {
             Ok(s) => cx.set_global(s),
