@@ -388,7 +388,7 @@ fn entry_icon(e: &Entry) -> AnyElement {
 }
 
 impl Workspace {
-    /// In 批量删除 a click checks or unchecks; otherwise it opens.
+    /// In 批量管理 a click checks or unchecks; otherwise it opens.
     fn home_click(&mut self, id: &str, window: &mut Window, cx: &mut Context<Self>) {
         if self.batch.is_none() { return self.open(id, window, cx) }
         if !self.toggle_check(id) {
@@ -397,7 +397,7 @@ impl Workspace {
         cx.notify();
     }
 
-    /// The row's / card's checkbox while 批量删除 is on.
+    /// The row's / card's checkbox while 批量管理 is on.
     fn home_check(&self, e: &Entry) -> Option<Div> {
         use crate::sidebar::{BATCH_LIMIT, Check, checkbox};
         let sel = self.batch.as_ref()?;
@@ -561,7 +561,7 @@ impl Workspace {
                     cx.notify();
                 }))
         };
-        // 批量删除: the sidebar's 批量操作 selection, entered and shown here
+        // 批量管理: the sidebar's 批量操作 selection, entered and shown here
         // too, with a toolbar of its own.
         let text_btn = |id: &'static str, ic: &'static str, label: &'static str, enabled: bool| {
             div().id(id).flex_none().h(px(28.)).px(px(10.)).flex().items_center().gap(px(6.)).rounded(px(9.))
@@ -591,7 +591,12 @@ impl Workspace {
                     .on_click(cx.listener(move |w, _, _, cx| { w.batch = Some(if all { vec![] } else { ids.clone() }); cx.notify(); })))
                 .child(div().ml(px(10.)).text_size(px(13.)).line_height(px(20.)).text_color(Theme::text()).child(crate::localized_format!("已选 {n} 项", "Selected: {n}")))
                 .child(div().flex_1())
-                .child(text_btn("home-batch-delete", "bin", crate::settings::text("删除所选"), n > 0)
+                // The sidebar's 批量操作 actions: 创建副本 | 移动到 | 删除.
+                .child(text_btn("home-batch-copy", "copy", crate::settings::text("创建副本"), n > 0)
+                    .when(n > 0, |d| d.on_click(cx.listener(|w, _, _, cx| w.batch_copy(cx)))))
+                .child(text_btn("home-batch-move", "folder-input", crate::settings::text("移动到"), n > 0).ml(px(4.))
+                    .when(n > 0, |d| d.on_click(cx.listener(|w, _, window, cx| w.batch_move(window, cx)))))
+                .child(text_btn("home-batch-delete", "bin", crate::settings::text("删除"), n > 0).ml(px(4.))
                     .when(n > 0, |d| d.on_click(cx.listener(|w, _, _, cx| w.ask_batch_delete(cx)))))
                 .child(text_btn("home-batch-exit", "x", crate::settings::text("退出"), true).ml(px(8.))
                     .tip(crate::settings::text("退出批量操作"), None)
@@ -600,7 +605,7 @@ impl Workspace {
             .child(tab("home-tab-recent", crate::settings::text("我的文档"), HomeTab::Recent))
             .child(tab("home-tab-star", crate::settings::text("收藏"), HomeTab::Starred))
             .child(div().flex_1())
-            .child(text_btn("home-batch", "bin", crate::settings::text("批量删除"), true).mr(px(8.))
+            .child(text_btn("home-batch", "batch", crate::settings::text("批量管理"), true).mr(px(8.))
                 .on_click(cx.listener(|w, _, _, cx| { w.batch = Some(vec![]); w.row_menu = None; w.home.sort_menu = false; cx.notify(); })))
             .child(
                 div().id("home-sort").relative().h(px(28.)).px(px(10.)).flex().items_center().gap(px(6.))
