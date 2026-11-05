@@ -713,8 +713,9 @@ pub(crate) fn update_pill(cx: &mut Context<Workspace>) -> Option<AnyElement> {
         .text_size(px(12.)).line_height(px(16.)).font_weight(FontWeight::MEDIUM)
         .when(!busy, |d| d.cursor_pointer().bg(Theme::primary()).text_color(gpui::white()).hover(|s| s.opacity(0.9)))
         .when(busy, |d| d.bg(Theme::sidebar_hover()).text_color(Theme::text_caption()))
-        // Downloading: a fixed width (no jitter as the digits change), filled left to right.
-        .when_some(fill, |d, f| d.w(px(56.)).child(div().absolute().left_0().top_0().bottom_0().w(relative(f)).rounded_full().bg(Theme::primary().opacity(0.16))))
+        // Downloading: a fixed width (no jitter as the digits change), filled left
+        // to right behind a moving wave.
+        .when_some(fill, |d, f| d.w(px(56.)).child(ui::wave_fill(f, Theme::primary().opacity(0.18))))
         .child(div().relative().min_w_0().truncate().child(label))
         .tip(&tip, None)
         .on_click(move |_, _, cx| match &state { State::Available(_) => crate::update::download(cx), State::Ready(..) => crate::update::install(cx), _ => {} })
