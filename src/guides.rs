@@ -63,6 +63,24 @@ pub fn initialize(root: &Path) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    /// Guides go only into an empty folder: an existing library, even one whose
+    /// documents were all deleted, is never refilled or overwritten.
+    #[test]
+    fn existing_library_is_never_reseeded() {
+        let root = std::env::temp_dir().join(format!("qmd-guides-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        super::initialize(&root).unwrap();
+        let docs = root.join("docs");
+        let first = std::fs::read_dir(&docs).unwrap().next().unwrap().unwrap().path();
+        std::fs::write(&first, "<title>mine</title>").unwrap();
+        super::initialize(&root).unwrap();
+        assert_eq!(std::fs::read_to_string(&first).unwrap(), "<title>mine</title>");
+        for e in std::fs::read_dir(&docs).unwrap() { std::fs::remove_file(e.unwrap().path()).unwrap(); }
+        super::initialize(&root).unwrap();
+        assert_eq!(std::fs::read_dir(&docs).unwrap().count(), 0);
+        std::fs::remove_dir_all(&root).unwrap();
+    }
+
     /// Every Mac-only passage still exists, and the Windows guides keep no Mac key.
     #[test]
     fn windows_guides_use_windows_keys() {
