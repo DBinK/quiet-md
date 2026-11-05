@@ -46,15 +46,15 @@ pub fn card(on_close: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> 
     if !PENDING.load(Ordering::Relaxed) { return None }
     let notes = notes()?;
     let title = crate::localized_format!("已更新到 {}", "Updated to {}", VERSION);
-    let mut list = div().mt(px(6.)).flex().flex_col().gap(px(4.));
+    let mut list = div().mt(px(6.)).w_full().min_w_0().flex().flex_col().gap(px(4.));
     for &(zh, en) in notes {
-        list = list.child(div().flex().gap(px(6.)).text_size(px(12.)).line_height(px(18.)).text_color(Theme::text_caption())
+        list = list.child(div().w_full().min_w_0().flex().gap(px(6.)).text_size(px(12.)).line_height(px(18.)).text_color(Theme::text_caption())
             .child(div().flex_none().child("·")).child(div().flex_1().min_w_0().child(crate::settings::tr(zh, en))));
     }
     // A continuous-corner white surface; the faint shadow follows its radius.
-    Some(crate::ui::continuous_surface(RADIUS, Theme::bg_body()).id("changelog").flex_none().mx(px(crate::sidebar::SB_X - 4.)).mb(px(8.)).pl(px(12.)).pr(px(6.)).pt(px(8.)).pb(px(10.))
+    Some(crate::ui::continuous_surface(RADIUS, Theme::bg_body()).id("changelog").flex_none().min_w_0().overflow_hidden().mx(px(crate::sidebar::SB_X - 4.)).mb(px(2.)).pl(px(12.)).pr(px(6.)).pt(px(8.)).pb(px(10.))
         .rounded(px(RADIUS)).shadow(crate::theme::shadow_card())
-        .child(div().flex().items_center().justify_between()
+        .child(div().w_full().min_w_0().flex().items_center().justify_between()
             .child(div().text_size(px(13.)).line_height(px(20.)).font_weight(FontWeight::SEMIBOLD).child(title))
             .child(div().id("changelog-close").size(px(20.)).flex().items_center().justify_center().rounded(px(6.)).cursor_pointer()
                 .hover(|s| s.bg(Theme::fill_hover())).child(icon("x", 12., Theme::text_caption()))

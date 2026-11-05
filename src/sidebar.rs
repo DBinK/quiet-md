@@ -62,7 +62,6 @@ pub(crate) fn footer_slot(row: impl IntoElement) -> Div {
     div().pt(px(6.)).pb(px(10.)).px(px(SB_X)).child(row)
 }
 
-
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum Check {
     Off,
