@@ -432,9 +432,12 @@ impl Workspace {
         };
         ws.sort();
         ws.load_home();
+        // An empty library opens on 主页's empty state; only a quick note
+        // window starts a document of its own.
         match document.or_else(|| (!quick).then(|| ws.entries.first().map(|e| e.id.clone())).flatten()) {
             Some(id) => ws.open(&id, window, cx),
-            None => ws.new_doc(window, cx),
+            None if quick => ws.new_doc(window, cx),
+            None => ws.view = View::Home,
         }
         // Kept in the top bar (not just a toast): the user should notice.
         let warnings = ws.store.take_warnings();
@@ -654,12 +657,13 @@ impl Workspace {
         self.row_menu = None;
         if self.current.is_none() {
             // Stay on 主页 / 回收站 if that's where the delete came from.
+            // The last document gone leaves the library empty (主页's empty
+            // state), not a new 未命名 document.
             let view = self.view;
             match self.entries.first().map(|e| e.id.clone()) {
-                Some(next) => self.open(&next, window, cx),
-                None => self.new_doc(window, cx),
+                Some(next) => { self.open(&next, window, cx); self.view = view; }
+                None => self.view = if view == View::Doc { View::Home } else { view },
             }
-            self.view = view;
         }
         self.sync_sub_pages(cx);
         if self.view == View::Trash {
