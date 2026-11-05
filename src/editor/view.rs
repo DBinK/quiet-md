@@ -667,7 +667,7 @@ impl Editor {
             return match key {
                 ListKey::Up | ListKey::Down => self.mention_key(Some(matches!(key, ListKey::Up)), false, false, window, cx),
                 ListKey::Enter => self.mention_key(None, true, false, window, cx),
-                ListKey::Close => false,
+                ListKey::Close | ListKey::Left | ListKey::Right => false,
                 ListKey::CloseAndPass => {
                     self.mention = None;
                     false
@@ -714,6 +714,13 @@ impl Editor {
             }
             e.slash_scroll.scroll_to_item(child);
         };
+        // The icon grid lays items out in a row: ← / → move like ↑ / ↓ (issue #4).
+        let key = match key {
+            ListKey::Left if grid => ListKey::Up,
+            ListKey::Right if grid => ListKey::Down,
+            ListKey::Left | ListKey::Right => ListKey::Close,
+            k => k,
+        };
         match key {
             ListKey::Up => {
                 if n > 0 {
@@ -736,7 +743,7 @@ impl Editor {
                     self.menu = None;
                 }
             },
-            ListKey::Close => {
+            ListKey::Close | ListKey::Left | ListKey::Right => {
                 self.slash = None;
                 if add {
                     self.menu = None;
@@ -1288,7 +1295,7 @@ impl Editor {
     // ---- action handlers
 
     fn on_move_left(&mut self, _: &k::MoveLeft, window: &mut Window, cx: &mut Context<Self>) {
-        if !self.guard(window, cx) || self.list_menu_key(ListKey::Close, window, cx) {
+        if !self.guard(window, cx) || self.list_menu_key(ListKey::Left, window, cx) {
             return;
         }
         if self.core.in_block_mode() {
@@ -1301,7 +1308,7 @@ impl Editor {
     }
 
     fn on_move_right(&mut self, _: &k::MoveRight, window: &mut Window, cx: &mut Context<Self>) {
-        if !self.guard(window, cx) || self.list_menu_key(ListKey::Close, window, cx) {
+        if !self.guard(window, cx) || self.list_menu_key(ListKey::Right, window, cx) {
             return;
         }
         if self.core.in_block_mode() {
@@ -2458,6 +2465,9 @@ impl Editor {
 enum ListKey {
     Up,
     Down,
+    /// ← / →: step through the icon grid; elsewhere they close the menu.
+    Left,
+    Right,
     Enter,
     Close,
     CloseAndPass,
