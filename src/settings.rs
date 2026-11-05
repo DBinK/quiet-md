@@ -694,23 +694,28 @@ impl Workspace {
 }
 
 /// The sidebar bar's 更新 pill, only while a new version is on offer:
-/// 更新 downloads it, 重启以更新 installs it.
+/// 更新 downloads it (the pill then fills with its progress), 重启更新
+/// installs it. Labels stay short: the bar keeps 72pt for it at the
+/// narrowest sidebar, and a longer one ellipsizes rather than clips.
 pub(crate) fn update_pill(cx: &mut Context<Workspace>) -> Option<AnyElement> {
     use crate::update::State;
     let state = crate::update::state(cx);
     let (label, tip) = match &state {
-        State::Available(m) => (tr("更新", "Update"), crate::localized_format!("下载 Quiet.md {}", "Download Quiet.md {}", m.version)),
-        State::Downloading(m) => (tr("正在下载…", "Downloading…"), crate::localized_format!("正在下载 {}…", "Downloading {}…", m.version)),
-        State::Ready(m, _) => (tr("重启以更新", "Restart to Update"), crate::localized_format!("重启后更新到 {}，打开的文档会先保存", "Restart into {}; open documents are saved first", m.version)),
-        State::Installing(m) => (tr("退出后更新", "Updates on quit"), crate::localized_format!("Quiet.md 退出后安装 {}", "{} installs when Quiet.md quits", m.version)),
+        State::Available(m) => (tr("更新", "Update").to_string(), crate::localized_format!("下载 Quiet.md {}", "Download Quiet.md {}", m.version)),
+        State::Downloading(m) => (format!("{:.0}%", crate::update::progress(m) * 100.), crate::localized_format!("正在下载 {}…", "Downloading {}…", m.version)),
+        State::Ready(m, _) => (tr("重启更新", "Restart").to_string(), crate::localized_format!("重启后更新到 {}，打开的文档会先保存", "Restart into {}; open documents are saved first", m.version)),
+        State::Installing(m) => (tr("即将更新", "Updating").to_string(), crate::localized_format!("Quiet.md 退出后安装 {}", "{} installs when Quiet.md quits", m.version)),
         _ => return None,
     };
+    let fill = if let State::Downloading(m) = &state { Some(crate::update::progress(m)) } else { None };
     let busy = matches!(state, State::Downloading(_) | State::Installing(_));
-    Some(div().id("update-pill").no_drag().flex_none().h(px(24.)).px(px(10.)).flex().items_center().rounded_full()
+    Some(div().id("update-pill").no_drag().flex_shrink().min_w_0().h(px(24.)).px(px(10.)).relative().overflow_hidden().flex().items_center().justify_center().rounded_full()
         .text_size(px(12.)).line_height(px(16.)).font_weight(FontWeight::MEDIUM)
         .when(!busy, |d| d.cursor_pointer().bg(Theme::primary()).text_color(gpui::white()).hover(|s| s.opacity(0.9)))
         .when(busy, |d| d.bg(Theme::sidebar_hover()).text_color(Theme::text_caption()))
-        .child(label)
+        // Downloading: a fixed width (no jitter as the digits change), filled left to right.
+        .when_some(fill, |d, f| d.w(px(56.)).child(div().absolute().left_0().top_0().bottom_0().w(relative(f)).rounded_full().bg(Theme::primary().opacity(0.16))))
+        .child(div().relative().min_w_0().truncate().child(label))
         .tip(&tip, None)
         .on_click(move |_, _, cx| match &state { State::Available(_) => crate::update::download(cx), State::Ready(..) => crate::update::install(cx), _ => {} })
         .into_any_element())
@@ -726,7 +731,7 @@ fn update_row(cx: &mut Context<Workspace>) -> Div {
         State::Checking => (tr("正在检查更新…", "Checking for updates…").into(), None),
         State::Current => (tr("已是最新版本", "Quiet.md is up to date").into(), None),
         State::Available(m) => (crate::localized_format!("新版本 {} 可用", "Version {} is available", m.version).into(), None),
-        State::Downloading(m) => (crate::localized_format!("正在下载 {}…", "Downloading {}…", m.version).into(), None),
+        State::Downloading(m) => (crate::localized_format!("正在下载 {}… {:.0}%", "Downloading {}… {:.0}%", m.version, crate::update::progress(m) * 100.).into(), None),
         State::Ready(m, _) => (crate::localized_format!("{} 已准备好", "{} is ready to install", m.version).into(), desc(tr("重启后完成更新，打开的文档会先保存。", "Quiet.md restarts to finish; open documents are saved first."))),
         State::Installing(m) => (crate::localized_format!("{} 将在退出后安装", "{} installs when Quiet.md quits", m.version).into(), None),
         State::Failed(e) => (tr("更新失败", "Update failed").into(), Some(e.clone().into())),

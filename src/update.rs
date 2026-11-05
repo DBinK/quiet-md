@@ -109,10 +109,23 @@ fn announce(version: &str, cx: &mut App) {
     if let Some(w) = window { let _ = w.update(cx, |ws, _, cx| ws.show_toast_kind(crate::ui::ToastKind::Info, &msg, cx)); }
 }
 
+/// How much of `m` has arrived, 0–1, read off the partial file.
+pub fn progress(m: &Manifest) -> f32 {
+    let Some(platform) = platform() else { return 0. };
+    let part = updates_dir().join(format!("{}.part", package_name(&m.version, platform)));
+    let got = std::fs::metadata(part).map_or(0, |d| d.len());
+    if m.size == 0 { 0. } else { (got as f32 / m.size as f32).clamp(0., 1.) }
+}
+
 /// Downloads and verifies the version on offer.
 pub fn download(cx: &mut App) {
     let State::Available(m) = state(cx) else { return };
     set(State::Downloading(m.clone()), cx);
+    // Redraw the progress (read off the partial file) while the download runs.
+    cx.spawn(async |cx| loop {
+        cx.background_executor().timer(Duration::from_millis(300)).await;
+        if !cx.update(|cx| if matches!(state(cx), State::Downloading(_)) { cx.refresh_windows(); true } else { false }).unwrap_or(false) { break }
+    }).detach();
     let task = cx.background_executor().spawn({ let m = m.clone(); async move { fetch_package(&m) } });
     cx.spawn(async move |cx| {
         let result = task.await;
