@@ -4260,6 +4260,7 @@ dependencies = [
  "html5ever",
  "image",
  "katex-rs",
+ "log",
  "markup5ever_rcdom",
  "minisign-verify",
  "objc",

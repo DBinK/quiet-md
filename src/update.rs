@@ -215,7 +215,10 @@ fn fetch_package(m: &Manifest) -> Result<PathBuf, String> {
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     let file = dir.join(&name);
     let part = dir.join(format!("{name}.part"));
-    curl(&["--max-time", "900", "-o", &part.to_string_lossy(), &m.url])?;
+    // curl gets no path: a Windows curl.exe reads its arguments in the ANSI
+    // code page, which cannot spell every user folder name (中文 included).
+    let out = std::fs::File::create(&part).map_err(|e| e.to_string())?;
+    curl_to(&["--max-time", "900", &m.url], Stdio::from(out))?;
     let bytes = std::fs::read(&part).map_err(|e| e.to_string())?;
     let failed = |what: &str| format!("{}: {what}", crate::settings::tr("更新包校验失败", "The update package failed verification"));
     if bytes.len() as u64 != m.size { return Err(failed("size")) }
@@ -239,9 +242,12 @@ fn fetch_package(m: &Manifest) -> Result<PathBuf, String> {
     Ok(file)
 }
 
-fn curl(args: &[&str]) -> Result<Vec<u8>, String> {
+fn curl(args: &[&str]) -> Result<Vec<u8>, String> { curl_to(args, Stdio::piped()) }
+
+/// `stdout`: piped (returned) or a file to download into.
+fn curl_to(args: &[&str], stdout: Stdio) -> Result<Vec<u8>, String> {
     let out = command("curl").args(["-fsSL", "--proto", "=https,http", "--connect-timeout", "15"]).args(args)
-        .stdin(Stdio::null()).stderr(Stdio::piped()).output()
+        .stdin(Stdio::null()).stdout(stdout).stderr(Stdio::piped()).output()
         .map_err(|e| format!("curl: {e}"))?;
     if out.status.success() { return Ok(out.stdout) }
     let msg = String::from_utf8_lossy(&out.stderr).trim().trim_start_matches("curl: ").to_string();
