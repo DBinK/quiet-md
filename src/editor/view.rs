@@ -1794,10 +1794,11 @@ impl Editor {
                     ClipboardEntry::String(s) => Some(s),
                     _ => None,
                 });
-                let image = item.entries().iter().find_map(|e| match e {
+                let images: Vec<_> = item.entries().iter().filter_map(|e| match e {
                     ClipboardEntry::Image(img) => Some(img),
                     _ => None,
-                });
+                }).collect();
+                let image = (!images.is_empty()).then_some(images);
                 (s.map(|s| s.text().clone()), s.and_then(|s| s.metadata_json::<String>()), image)
             }
             (None, None) => return,
@@ -1844,18 +1845,20 @@ impl Editor {
             self.core.paste_blocks(b);
         } else if let Some(s) = text.filter(|s| !s.is_empty()) {
             self.core.paste_markdown(&s);
-        } else if let Some(img) = image {
-            let ext = match img.format {
-                ImageFormat::Jpeg => "jpg",
-                ImageFormat::Gif => "gif",
-                ImageFormat::Webp => "webp",
-                ImageFormat::Svg => "svg",
-                ImageFormat::Bmp => "bmp",
-                ImageFormat::Tiff => "tiff",
-                _ => "png",
-            };
-            let bytes = img.bytes.clone();
-            self.insert_image_bytes(&bytes, ext, window, cx);
+        } else if let Some(images) = image {
+            // Several copied image files paste one after another.
+            for img in images {
+                let ext = match img.format {
+                    ImageFormat::Jpeg => "jpg",
+                    ImageFormat::Gif => "gif",
+                    ImageFormat::Webp => "webp",
+                    ImageFormat::Svg => "svg",
+                    ImageFormat::Bmp => "bmp",
+                    ImageFormat::Tiff => "tiff",
+                    _ => "png",
+                };
+                self.insert_image_bytes(&img.bytes, ext, window, cx);
+            }
         }
         if let Some(msg) = self.core.notice.take() {
             self.toast(msg, cx);

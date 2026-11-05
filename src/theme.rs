@@ -2,7 +2,7 @@
 //! The layout departs in one place: a sunken sidebar on the window surface
 //! and a full-bleed white note plane instead of floating panels.
 
-use gpui::{BoxShadow, Hsla, Rgba, point, px, rgb};
+use gpui::{BoxShadow, Hsla, Rgba, WindowBackgroundAppearance, point, px, rgb};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 // ---- dark mode
@@ -14,6 +14,28 @@ use std::sync::atomic::{AtomicBool, Ordering};
 // (the accent, coloured text) keep their hue and stay readable. Text
 // highlights keep their light colours instead (`mark`, `on_mark`).
 // `rgbaf` stays literal for shadows, scrims and controls drawn over images.
+
+// ---- window glass
+
+/// Whether windows sit on blurred glass. Windows 10 and 11 21H2 drag acrylic
+/// windows with a lag (GitHub #32): there the window is opaque.
+pub fn glass() -> bool {
+    #[cfg(target_os = "windows")] {
+        static GLASS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *GLASS.get_or_init(|| windows_build().is_some_and(|b| b >= 22621))
+    }
+    #[cfg(not(target_os = "windows"))] { true }
+}
+
+#[cfg(target_os = "windows")]
+fn windows_build() -> Option<u32> {
+    let key = windows_registry::LOCAL_MACHINE.open(r"SOFTWARE\Microsoft\Windows NT\CurrentVersion").ok()?;
+    key.get_string("CurrentBuildNumber").ok()?.trim().parse().ok()
+}
+
+pub fn window_background() -> WindowBackgroundAppearance {
+    if glass() { WindowBackgroundAppearance::Blurred } else { WindowBackgroundAppearance::Opaque }
+}
 
 static DARK: AtomicBool = AtomicBool::new(false);
 thread_local! {
@@ -351,7 +373,7 @@ impl Theme {
     // ---- Quiet.md shell
     /// A light gray tint separates the sidebar from the white page while keeping wallpaper colors quiet.
     /// The document pane paints its own opaque white surface.
-    pub fn window() -> Hsla { if crate::native_header::supported() { ca(craft::WINDOW, 0.) } else { ca(craft::WINDOW, 0.84) } }
+    pub fn window() -> Hsla { if crate::native_header::supported() { ca(craft::WINDOW, 0.) } else if crate::theme::glass() { ca(craft::WINDOW, 0.84) } else { ca(craft::WINDOW, 1.) } }
     /// Sidebar row label: text at 85%.
     pub fn sidebar_text() -> Hsla { ca(craft::N900, 0.85) }
     pub fn sidebar_hover() -> Hsla { ca(craft::N1000, 0.045) }
