@@ -208,7 +208,9 @@ impl Workspace {
         let menu = popover()
             .id("trash-menu")
             .occlude()
-            .w(px(TRASH_MENU_W))
+            // At least TRASH_MENU_W, wider when a label needs it (English
+            // "Delete permanently" ran into the edge).
+            .min_w(px(TRASH_MENU_W))
             .py(px(crate::ui::MENU_PAD_Y))
             .on_mouse_down_out(cx.listener(|w, _, _, cx| {
                 w.trash_menu = None;
