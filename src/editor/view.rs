@@ -142,6 +142,8 @@ pub struct Editor {
     pub hover: Option<BlockId>,
     /// The hovered block's top has scrolled out of the page viewport (last frame).
     pub hover_clipped: bool,
+    /// An edit since the pointer last moved: the hover handle hides until it moves.
+    pub typing: bool,
     /// Blocks that can show the hover handle (set during render).
     pub handle_targets: Vec<BlockId>,
     /// Painted bounds of the callout bar and its colour panel (last frame).
@@ -372,6 +374,7 @@ impl Editor {
             gap_press: None,
             hover: None,
             hover_clipped: false,
+            typing: false,
             handle_targets: vec![],
             callout_zone: Rc::default(),
             caret_visible: true,
@@ -496,6 +499,7 @@ impl Editor {
         self.core.reveal_caret();
         if self.core.dirty {
             self.core.dirty = false;
+            self.typing = true;
             self.hide_link_card(cx);
             cx.emit(EditorEvent::Changed);
             self.refresh_find(false, cx);
@@ -2278,6 +2282,10 @@ impl Editor {
             }
         }
         let p = ev.position;
+        if self.typing {
+            self.typing = false;
+            cx.notify();
+        }
         // A clicked callout dropdown stays open until a selection or outside click.
         if matches!(self.menu, Some(Menu::CalloutColor { .. })) {
             return;
