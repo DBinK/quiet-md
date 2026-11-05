@@ -220,7 +220,7 @@ impl Workspace {
         let subs = self.sub_page_titles(id);
         let name = file_name(&doc);
         let path = save_path(&format!("{name}.pdf"), cx);
-        let view = printing::ns_view_of(window);
+        let view = printing::parent_of(window);
         cx.spawn_in(window, async move |this, cx| {
             let Some(path) = path.await else { return };
             let _ = this.update(cx, |w, cx| w.show_toast_kind(ToastKind::Info, crate::settings::text("正在导出文档"), cx));
@@ -251,7 +251,7 @@ impl Workspace {
         let subs = self.sub_page_titles(id);
         let name = file_name(&doc);
         let html = crate::html::to_html(&doc, &crate::html::Options { sub_pages: &subs });
-        let view = printing::ns_view_of(window);
+        let view = printing::parent_of(window);
         self.show_toast_kind(ToastKind::Info, crate::settings::text("文档打印中"), cx);
         cx.spawn_in(window, async move |this, cx| {
             let res = printing::run(html, name, Job::Print, view, cx).await;
