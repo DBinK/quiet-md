@@ -348,7 +348,7 @@ impl Editor {
         }
         match &self.menu {
             Some(Menu::Block { block, .. }) | Some(Menu::Add { block, .. }) => Some(*block),
-            _ => self.hover.filter(|_| !self.hover_clipped),
+            _ => self.hover.filter(|_| !self.hover_clipped && !self.typing),
         }
     }
 
