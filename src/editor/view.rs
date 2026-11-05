@@ -714,24 +714,26 @@ impl Editor {
             }
             e.slash_scroll.scroll_to_item(child);
         };
-        // The icon grid lays items out in a row: ← / → move like ↑ / ↓ (issue #4).
+        // The icon grid (rows of GRID_COLS, then the list): ← / → step through
+        // items in order, ↑ / ↓ move a whole row inside the grid (issue #4).
+        let cells = if grid { results.iter().take_while(|i| menus::SLASH_ITEMS[**i].group == 0).count() } else { 0 };
+        let (prev, next) = (if cur >= n { n.saturating_sub(1) } else { (cur + n - 1) % n.max(1) }, if cur >= n { 0 } else { (cur + 1) % n.max(1) });
         let key = match key {
-            ListKey::Left if grid => ListKey::Up,
-            ListKey::Right if grid => ListKey::Down,
-            ListKey::Left | ListKey::Right => ListKey::Close,
+            ListKey::Left | ListKey::Right if !grid => ListKey::Close,
             k => k,
         };
         match key {
-            ListKey::Up => {
-                if n > 0 {
-                    set(self, if cur >= n { n - 1 } else { (cur + n - 1) % n });
-                }
-            }
-            ListKey::Down => {
-                if n > 0 {
-                    set(self, if cur >= n { 0 } else { (cur + 1) % n });
-                }
-            }
+            _ if n == 0 && matches!(key, ListKey::Up | ListKey::Down | ListKey::Left | ListKey::Right) => {}
+            ListKey::Left => set(self, prev),
+            ListKey::Right => set(self, next),
+            // Up: a row up in the grid; from the list's first item, back to the
+            // grid's last row; from the grid's top row, around to the last item.
+            ListKey::Up if cur < cells => set(self, if cur >= menus::GRID_COLS { cur - menus::GRID_COLS } else { n - 1 }),
+            ListKey::Up if cur == cells && cells > 0 => set(self, (cells - 1) / menus::GRID_COLS * menus::GRID_COLS),
+            ListKey::Up => set(self, prev),
+            // Down: a row down in the grid; from its last row, into the list.
+            ListKey::Down if cur < cells => set(self, if cur + menus::GRID_COLS < cells { cur + menus::GRID_COLS } else if cells < n { cells } else { 0 }),
+            ListKey::Down => set(self, next),
             ListKey::Enter => match results.get(cur) {
                 Some(i) => {
                     let kind = menus::SLASH_ITEMS[*i].kind;
@@ -743,7 +745,7 @@ impl Editor {
                     self.menu = None;
                 }
             },
-            ListKey::Close | ListKey::Left | ListKey::Right => {
+            ListKey::Close => {
                 self.slash = None;
                 if add {
                     self.menu = None;
