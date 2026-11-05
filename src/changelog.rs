@@ -10,6 +10,7 @@ use crate::theme::Theme;
 use crate::ui::icon;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+const RADIUS: f32 = 12.;
 
 /// Each version's notes: (version, [(中文, English)]). Only the running
 /// version's are shown; a version without notes shows nothing.
@@ -50,8 +51,9 @@ pub fn card(on_close: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> 
         list = list.child(div().flex().gap(px(6.)).text_size(px(12.)).line_height(px(18.)).text_color(Theme::text_caption())
             .child(div().flex_none().child("·")).child(div().flex_1().min_w_0().child(crate::settings::tr(zh, en))));
     }
-    Some(div().id("changelog").flex_none().mx(px(crate::sidebar::SB_X - 4.)).mb(px(8.)).pl(px(12.)).pr(px(6.)).pt(px(8.)).pb(px(10.))
-        .rounded(px(10.)).bg(Theme::bg_body()).border_1().border_color(Theme::line_border())
+    // A continuous-corner white surface; the faint shadow follows its radius.
+    Some(crate::ui::continuous_surface(RADIUS, Theme::bg_body()).id("changelog").flex_none().mx(px(crate::sidebar::SB_X - 4.)).mb(px(8.)).pl(px(12.)).pr(px(6.)).pt(px(8.)).pb(px(10.))
+        .rounded(px(RADIUS)).shadow(crate::theme::shadow_card())
         .child(div().flex().items_center().justify_between()
             .child(div().text_size(px(13.)).line_height(px(20.)).font_weight(FontWeight::SEMIBOLD).child(title))
             .child(div().id("changelog-close").size(px(20.)).flex().items_center().justify_center().rounded(px(6.)).cursor_pointer()

@@ -62,7 +62,6 @@ pub(crate) fn footer_slot(row: impl IntoElement) -> Div {
     div().pt(px(6.)).pb(px(10.)).px(px(SB_X)).child(row)
 }
 
-pub(crate) fn footer_line() -> Div { div().flex_none().mx(px(17.)).h(px(1.)).bg(Theme::sidebar_divider()) }
 
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum Check {
@@ -218,7 +217,6 @@ impl Workspace {
             .flex_none()
             .flex()
             .flex_col()
-            .child(footer_line())
             .when(self.batch.is_none(), |d| {
                 d.child(footer_slot(
                     footer_row("ft-settings", "settings-gear", crate::settings::tr("设置", "Settings"))

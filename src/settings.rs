@@ -543,7 +543,6 @@ impl Workspace {
                 .child(div().flex().flex_col().gap(px(sb::ROW_GAP)).children(NAV.iter().map(|p| nav_row(*p, cx)).collect::<Vec<_>>())))
             // Where 设置 was: 返回, back to the page 设置 was opened from.
             .child(div().flex_1())
-            .child(sb::footer_line())
             .child(sb::footer_slot(sb::footer_row("ft-back", "arrow-left", tr("返回", "Back")).tip(tr("返回", "Back"), Some("Esc"))
                 .on_click(cx.listener(|w, _, _, cx| w.close_settings(cx)))))
             .into_any_element()
