@@ -773,7 +773,7 @@ Windows 安装包随附未修改的 Microsoft Visual C++ Runtime `vcruntime140.d
 
 ## 封面与插画
 
-`assets/covers/`（52 张封面）、`assets/illus/`（3 张空态插画）随本项目以 MIT 分发。
+`assets/covers/`（26 张封面及其缩略图）、`assets/illus/`（3 张空态插画，本项目绘制）随本项目以 MIT 分发。
 
 ## 内置主题的样式数值
 
