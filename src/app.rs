@@ -327,7 +327,7 @@ impl Workspace {
             // The system switched between light and dark (or the app's own look changed).
             cx.observe_window_appearance(window, |this, _, cx| if crate::settings::sync_dark(cx) { crate::settings::refresh_all(this, cx); }),
             cx.observe_window_activation(window, |this, window, cx| {
-                if window.is_window_active() { if let Some(id) = &this.current { crate::quick_note::used(id, cx); } this.entries = this.store.list(); this.sort(); cx.notify(); }
+                if window.is_window_active() { if let Some(id) = &this.current { crate::quick_note::used(id, cx); } this.entries = this.store.list(); this.sort(); crate::update::check_if_stale(cx); cx.notify(); }
                 else { this.cancel_shortcut_recording(cx); this.flush(cx); }
             }),
             cx.subscribe_in(&search, window, |this, _, ev: &TextFieldEvent, window, cx| {
