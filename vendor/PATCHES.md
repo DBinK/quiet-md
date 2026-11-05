@@ -31,6 +31,7 @@ diff -ru $R/taffy-0.9.0/src vendor/taffy/src
 | 13 | `text_system/line.rs` | 文字与背景装饰的场景排序边界包含居中、右对齐后的字形位置及超宽文字 | 图片描述不再穿透浮动工具栏，避免工具栏看起来透明 |
 | 14 | `platform/mac/text_system.rs`、`platform/mac.rs`、`platform.rs` | `font_ids_by_postscript_name` 一个名字对应多个 FontId，CoreText 回退来的字体按字形数挑出同一份字体；新增 `check_fallback_glyphs` 供测试调用（`editor::text::tests`） | 系统回退用的苹方（PingFangUI.ttc）和下载的 PingFang.ttc 都叫 `PingFangSC-Regular`，字形表不同；原来按名字查到另一份，编辑器里的中文画成错字 |
 | 15 | `platform/windows/directx_renderer.rs` | 调试构建编译着色器时，路径按宽字符串传给 `D3DCompileFromFile`（原来 `to_str().unwrap()`） | 仓库放在含中文等非 ASCII 字符的目录下也能跑调试构建 |
+| 16 | `platform/windows/clipboard.rs` | 读剪贴板时文字、图片、复制的文件一起读（原来只取第一个认得的格式）；新增位图（`CF_DIB`，转成 PNG）；复制的图片文件读成图片，其他文件的路径按行分开（原来连成一串） | 截图工具放进剪贴板的位图能粘贴，不再贴出截图文件的路径；从资源管理器复制的图片能粘贴 |
 
 ## taffy 0.9.0
 
