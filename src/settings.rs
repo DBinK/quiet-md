@@ -954,6 +954,8 @@ pub(crate) fn localize(text: &str, english: bool) -> &str {
         "点击展开" => "Click to expand",
         "点击折叠" => "Click to collapse",
         "批量操作" => "Select documents",
+        "批量删除" => "Delete several",
+        "删除所选" => "Delete selected",
         "无法选中，选择的页面数已到达上限" => "Selection limit reached",
         "在新窗口中打开" => "Open in new window",
         "搜索目标位置" => "Search destinations",

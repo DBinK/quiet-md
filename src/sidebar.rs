@@ -35,7 +35,7 @@ pub(crate) const SECTION_H: f32 = 34.;
 pub(crate) const SECTION_TOP: f32 = 6.;
 
 /// 批量操作 caps at 50 pages.
-const BATCH_LIMIT: usize = 50;
+pub(crate) const BATCH_LIMIT: usize = 50;
 
 /// The footer row: like 主页 (same pill, glyph and label columns) under
 /// the footer line, so the bottom corner mirrors the top.
@@ -65,14 +65,14 @@ pub(crate) fn footer_slot(row: impl IntoElement) -> Div {
 pub(crate) fn footer_line() -> Div { div().flex_none().mx(px(17.)).h(px(1.)).bg(Theme::sidebar_divider()) }
 
 #[derive(Clone, Copy, PartialEq)]
-enum Check {
+pub(crate) enum Check {
     Off,
     Partial,
     On,
 }
 
 /// 14px checkbox; an unchecked box turns blue when `group` is hovered.
-fn checkbox(state: Check, disabled: bool, group: &'static str) -> Div {
+pub(crate) fn checkbox(state: Check, disabled: bool, group: &'static str) -> Div {
     let white = Theme::bg_body();
     div()
         .size(px(14.))
