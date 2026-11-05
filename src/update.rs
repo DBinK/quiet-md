@@ -48,7 +48,8 @@ pub enum State {
     Failed(String),
 }
 
-pub struct Updater { pub state: State, told: Option<String> }
+/// `last`: when the latest automatic check started.
+pub struct Updater { pub state: State, told: Option<String>, last: Option<std::time::Instant> }
 impl Global for Updater {}
 
 pub fn state(cx: &App) -> State { cx.try_global::<Updater>().map_or(State::Idle, |u| u.state.clone()) }
@@ -60,7 +61,7 @@ fn set(state: State, cx: &mut App) {
 
 /// Starts the periodic check.
 pub fn init(cx: &mut App) {
-    cx.set_global(Updater { state: State::Idle, told: None });
+    cx.set_global(Updater { state: State::Idle, told: None, last: None });
     cx.spawn(async |cx| {
         cx.background_executor().timer(Duration::from_secs(10)).await;
         loop {
@@ -68,6 +69,15 @@ pub fn init(cx: &mut App) {
             cx.background_executor().timer(Duration::from_secs(12 * 3600)).await;
         }
     }).detach();
+}
+
+/// A window came to the front: check again if the last check is over an
+/// hour old, so a copy left open learns of a release within hours, not 12.
+pub fn check_if_stale(cx: &mut App) {
+    let Some(u) = cx.try_global::<Updater>() else { return };
+    // Before the first check (10s after launch) the timer has it.
+    if !crate::settings::prefs().auto_update || u.last.is_none_or(|t| t.elapsed() < Duration::from_secs(3600)) { return }
+    check(false, cx);
 }
 
 /// Asks the server for the newest version. `manual` (检查更新…) also reports
@@ -80,7 +90,7 @@ pub fn check(manual: bool, cx: &mut App) {
         State::Unsupported if !manual => return,
         _ => {}
     }
-    if manual { set(State::Checking, cx); }
+    if manual { set(State::Checking, cx); } else { cx.global_mut::<Updater>().last = Some(std::time::Instant::now()); }
     let task = cx.background_executor().spawn(async { fetch_manifest() });
     cx.spawn(async move |cx| {
         let result = task.await;
@@ -109,10 +119,23 @@ fn announce(version: &str, cx: &mut App) {
     if let Some(w) = window { let _ = w.update(cx, |ws, _, cx| ws.show_toast_kind(crate::ui::ToastKind::Info, &msg, cx)); }
 }
 
+/// How much of `m` has arrived, 0–1, read off the partial file.
+pub fn progress(m: &Manifest) -> f32 {
+    let Some(platform) = platform() else { return 0. };
+    let part = updates_dir().join(format!("{}.part", package_name(&m.version, platform)));
+    let got = std::fs::metadata(part).map_or(0, |d| d.len());
+    if m.size == 0 { 0. } else { (got as f32 / m.size as f32).clamp(0., 1.) }
+}
+
 /// Downloads and verifies the version on offer.
 pub fn download(cx: &mut App) {
     let State::Available(m) = state(cx) else { return };
     set(State::Downloading(m.clone()), cx);
+    // Redraw the progress (read off the partial file) while the download runs.
+    cx.spawn(async |cx| loop {
+        cx.background_executor().timer(Duration::from_millis(300)).await;
+        if !cx.update(|cx| if matches!(state(cx), State::Downloading(_)) { cx.refresh_windows(); true } else { false }).unwrap_or(false) { break }
+    }).detach();
     let task = cx.background_executor().spawn({ let m = m.clone(); async move { fetch_package(&m) } });
     cx.spawn(async move |cx| {
         let result = task.await;

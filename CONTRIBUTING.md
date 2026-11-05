@@ -79,7 +79,7 @@ SIGNING_IDENTITY="Developer ID Application: …" NOTARY_PROFILE="quiet-md" scrip
 
 ### 上传和自动更新
 
-`scripts/publish-downloads.sh <包>…` 把包上传到 `download.quiet.md` 的 `v<版本>/` 和 `latest/`，用 minisign 签名，最后写 `latest/update-<平台>.json`（`macos-arm64`、`windows-x64`）。应用读的就是这份清单：启动 10 秒后和之后每 12 小时检查一次（设置 › 通用 可关），菜单「检查更新…」立即检查；下载要用户点，校验 minisign 签名（trusted comment 必须是包的文件名），macOS 还要求新包的签名团队和当前应用一致，然后退出、换包、重新打开。实现见 `src/update.rs`。
+`scripts/publish-downloads.sh <包>…` 把包上传到 `download.quiet.md` 的 `v<版本>/` 和 `latest/`，用 minisign 签名，最后写 `latest/update-<平台>.json`（`macos-arm64`、`windows-x64`）。应用读的就是这份清单：启动 10 秒后和之后每 12 小时检查一次，窗口回到前台时如果距上次检查超过一小时也会再查（设置 › 通用 可关），菜单「检查更新…」立即检查；下载要用户点，校验 minisign 签名（trusted comment 必须是包的文件名），macOS 还要求新包的签名团队和当前应用一致，然后退出、换包、重新打开。实现见 `src/update.rs`。
 
 更新签名密钥只生成一次（`brew install minisign`），私钥放在仓库外，公钥提交：
 
