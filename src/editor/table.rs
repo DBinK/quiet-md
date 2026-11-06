@@ -92,7 +92,7 @@ impl Editor {
 
     /// The grid slot under `p`: `clamp` maps points outside the table to the
     /// nearest edge slot instead of None.
-    fn slot_at(&self, table: BlockId, p: Point<Pixels>, clamp: bool) -> Option<(usize, usize)> {
+    pub(super) fn slot_at(&self, table: BlockId, p: Point<Pixels>, clamp: bool) -> Option<(usize, usize)> {
         let geo = self.tables.geo.borrow();
         let find = |cols: bool, v: Pixels| -> Option<usize> {
             let span = |b: &Bounds<Pixels>| if cols { (b.left(), b.right()) } else { (b.top(), b.bottom()) };
