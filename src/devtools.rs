@@ -9,7 +9,7 @@
 //!   pick <path>[|<path>...] (answers the next file dialog instead of showing it)
 //! For profiling: bench <n> <step> (runs the step n times, drawing a frame
 //!   synchronously after each, and prints step / frame / editor-render times) |
-//!   wheel x y dy (one scroll-wheel event).
+//!   wheel x y dy [dx] (one scroll-wheel event; dx: sideways component).
 //! For demo videos: glide x y ms (eased pointer move from the last position) |
 //!   scroll x y dy ms (eased wheel scroll) | record <file.mp4> | record stop |
 //!   caption <text> (a timed note in the pointer track, for titles).
@@ -592,7 +592,9 @@ fn run(cmd: &str, rest: &str, window: &mut Window, cx: &mut App) {
             if n.len() >= 3 {
                 let event = ScrollWheelEvent {
                     position: point(px(n[0]), px(n[1])),
-                    delta: ScrollDelta::Pixels(point(px(0.), px(-n[2]))),
+                    // An optional fourth number is a sideways component, as a
+                    // trackpad swipe carries; positive reveals content on the right.
+                    delta: ScrollDelta::Pixels(point(px(-n.get(3).copied().unwrap_or(0.)), px(-n[2]))),
                     ..Default::default()
                 };
                 window.dispatch_event(PlatformInput::ScrollWheel(event), cx);
